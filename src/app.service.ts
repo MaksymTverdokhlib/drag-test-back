@@ -6,20 +6,17 @@ import { Box_parameters, Prisma } from '@prisma/client';
 export class AppService {
   constructor(private prisma: PrismaService) {}
 
-  async box(): Promise<Box_parameters | []> {
-    const users = await this.prisma.box_parameters.findMany();
-
-    const sortedUsers = users.sort((a, b) => {
-      if (a.id < b.id) {
-        return -1;
-      }
-      return 1;
+  async box(): Promise<Box_parameters | 'No data'> {
+    const user = await this.prisma.box_parameters.findFirst({
+      orderBy: {
+        id: 'asc',
+      },
     });
 
-    if (users.length === 0) {
-      return [];
+    if (!user) {
+      return 'No data';
     } else {
-      return sortedUsers[0];
+      return user;
     }
   }
 
@@ -38,36 +35,16 @@ export class AppService {
   }
 
   async updateBoxParameters(data: Prisma.Box_parametersUpdateInput) {
-    const users = await this.prisma.box_parameters.findMany();
-    const sortedUsers = users.sort((a, b) => {
-      if (a.id < b.id) {
-        return -1;
-      }
-      return 1;
-    });
-
-    return await this.prisma.box_parameters.update({
-      data,
-      where: {
-        id: sortedUsers[0].id,
+    const firstUser = await this.prisma.box_parameters.findFirst({
+      orderBy: {
+        id: 'asc',
       },
     });
-  }
-
-  async updateBoxCoordinates(data: Prisma.Box_parametersUpdateInput) {
-    const users = await this.prisma.box_parameters.findMany();
-
-    const sortedUsers = users.sort((a, b) => {
-      if (a.id < b.id) {
-        return -1;
-      }
-      return 1;
-    });
 
     return await this.prisma.box_parameters.update({
       data,
       where: {
-        id: sortedUsers[0].id,
+        id: firstUser.id,
       },
     });
   }
